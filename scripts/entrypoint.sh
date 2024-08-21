@@ -38,6 +38,10 @@ resolve_path() {
     echo "$abs_path"
 }
 
+USE_SNAPSHOT="${USE_SNAPSHOT:-true}"
+CONSENSUS_SNAPSHOT_URL="${CONSENSUS_SNAPSHOT_URL:-https://support.synergynodes.com/snapshots/berachain_v2_testnet/berachain_v2_testnet_3449816.tar.lz4}"
+EXECUTION_SNAPSHOT_URL="${EXECUTION_SNAPSHOT_URL:-https://beacon-snapshots.berachain.com/bartio-execution-80084.tar}"
+
 CHAINID="bartio-beacon-80084"
 MONIKER="docker-single-node"
 LOGLEVEL="info"
@@ -65,6 +69,12 @@ cp -f $BEACOND_PATH/networks/80084/kzg-trusted-setup.json ${HOMEDIR}/config
 
 $BEACOND_PATH/beacond jwt generate --home $HOMEDIR
 
+# Download Beacon Snapshot
+if [ "$USE_SNAPSHOT" = true ]; then
+    wget -O consensus-snapshot.tar.lz4 $CONSENSUS_SNAPSHOT_URL
+    lz4 -c -d consensus-snapshot.tar.lz4  | tar -x -C $HOMEDIR/data
+fi
+
 CL_SEEDS=$(sed -e '1d; :a;N;$!ba;s/\n/,/g' $BEACOND_PATH/networks/80084/cl-seeds.txt)
 
 # Start the node (remove the --pruning=nothing flag if historical queries are not needed)
@@ -83,7 +93,7 @@ eval $BEACON_START_CMD &
 NETWORK_ID="${NETWORK_ID:-80084}"
 TESTNET_ARGS="${TESTNET_ARGS:-}"
 ENABLE_DB_SNAPSHOT="${ENABLE_DB_SNAPSHOT:-true}"
-SYNC_MODE="${SYNC_MODE:-snap}" # snap, full
+SYNC_MODE="${SYNC_MODE:-full}" # snap, full
 GC_MODE="${GC_MODE:-full}" # full, archive
 VERBOSITY="${VERBOSITY:-3}"
 GETH_PEERS="${GETH_PEERS:-50}"

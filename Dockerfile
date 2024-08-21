@@ -97,7 +97,7 @@ RUN mv go-ethereum/build/bin/geth /app/geth \
 
 FROM ${RUNNER_IMAGE}
 
-RUN apk add --no-cache ca-certificates
+RUN apk add --no-cache ca-certificates lz4 curl-dev
 
 WORKDIR /app
 
