@@ -1,1 +1,1 @@
-# docker-example-berachain
+# Berachain Node Monodockerfile
